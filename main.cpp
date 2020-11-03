@@ -21,9 +21,13 @@ int main(){
   cv::Ptr<cv::ORB> orb = cv::ORB::create();
   cv::Ptr<cv::DescriptorMatcher> bfmatch = cv::BFMatcher::create(cv::NORM_HAMMING, false);
   std::vector<std::vector<cv::DMatch>> matches;
-  std::vector<cv::DMatch> goodmatches;
+  std::vector<std::vector<cv::DMatch>> goodmatches;
+  std::vector<cv::KeyPoint> kp;
   cv::Mat imgmatches;
   while(1){
+    goodmatches.clear();
+    matches.clear();
+    kp.clear();
     if(!cap.read(frame)){
       std::cout << "Can't read file" << std::endl;
       break;
@@ -31,7 +35,6 @@ int main(){
     cv::resize(frame, frame, cv::Size(640, 540), 0, 0, cv::INTER_AREA);
     cv::cvtColor(frame, grayframe, cv::COLOR_BGR2GRAY, 0);
     cv::goodFeaturesToTrack(grayframe, corners, 1000, 0.01, 10, grayframe, 3, 3, false, 0.04);
-    std::vector<cv::KeyPoint> kp;
     for(size_t i = 0; i < corners.size(); i++){
       kp.push_back(cv::KeyPoint(corners[i], 1.f));
     }
@@ -41,16 +44,15 @@ int main(){
     }
     if(!olddesc.empty())
       bfmatch->knnMatch(desc, olddesc, matches, 2); 
-    goodmatches.clear();
     for(uint i = 0; i < matches.size(); ++i){
         if(matches[i][0].distance < 0.75 * matches[i][1].distance)
-          goodmatches.push_back(matches[i][0]);
+          goodmatches.push_back(matches[i]/*[0]*/);
     }
-    std::cout << goodmatches.size() << std::endl;
     cv::Mat test;
-    if(!olddesc.empty())
+    if(!olddesc.empty()){
       cv::drawMatches(oldgrayframe, oldkp, grayframe, kp, goodmatches, test);
-    imshow("vid", frame);
+      imshow("vid", test);
+    }
     oldgrayframe = grayframe;
     olddesc = desc;
     oldkp = kp;
