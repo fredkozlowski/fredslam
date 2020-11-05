@@ -63,7 +63,11 @@ int main(){
     cv::KeyPoint::convert(oldkp, selectpoints2, pointindex2);
     if(!olddesc.empty()){
       fundamental = cv::findFundamentalMat(cv::Mat(selectpoints1), cv::Mat(selectpoints2), cv::FM_RANSAC);
-      std::cout << fundamental.size() << std::endl;
+      std::vector<cv::Point3f> lines;
+      computeCorrespondEpilines(selectpoints1, 1, fundamental, lines);
+      for(auto i : lines){
+        //cv::line(frame, 
+      }
       //cv::drawMatches(oldgrayframe, oldkp, grayframe, kp, goodmatches, output);
       //imshow("vid", output);
     }
