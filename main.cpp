@@ -12,8 +12,14 @@ int main(){
   if(!cap.isOpened())
     return -1;
 
+  cv::Mat cameramatrix = cv::Mat::zeros(3, 3, CV_64F);
+  cameramatrix.at<double>(0, 0) = 500;
+  cameramatrix.at<double>(1, 1) = 500;
+  cv::Mat R;
+  cv::Mat t;
   cv::Mat output;
   cv::Mat fundamental;
+  cv::Mat essential;
   cv::Mat frame;
   cv::Mat grayframe;
   std::vector<cv::Point2f> corners;
@@ -62,16 +68,22 @@ int main(){
     cv::KeyPoint::convert(kp, selectpoints1, pointindex1);
     cv::KeyPoint::convert(oldkp, selectpoints2, pointindex2);
     if(!olddesc.empty()){
-      fundamental = cv::findFundamentalMat(cv::Mat(selectpoints1), cv::Mat(selectpoints2), cv::FM_RANSAC);
+      //fundamental = cv::findFundamentalMat(cv::Mat(selectpoints1), cv::Mat(selectpoints2), cv::FM_RANSAC);
+      essential = cv::findEssentialMat(cv::Mat(selectpoints1), cv::Mat(selectpoints2));
       std::vector<cv::Point3f> lines;
-      computeCorrespondEpilines(selectpoints1, 1, fundamental, lines);
-      std::cout << lines.size() << std::endl;
-      std::cout << selectpoints1.size() << std::endl;
-      for(uint i = 0; i < lines.size(); ++i){
-        std::cout << selectpoints1.at(i) << std::endl;
-        std::cout << lines.at(i) << std::endl;
-        cv::line(frame, selectpoints1.at(i), selectpoints2.at(i), cv::Scalar(5,100, 200)); 
+      //computeCorrespondEpilines(selectpoints1, 1, fundamental, lines);
+      for(uint i = 0; i < selectpoints1.size(); ++i){
+        //std::cout << selectpoints1.at(i) << std::endl;
+        //std::cout << lines.at(i) << std::endl;
+        //cv::line(frame, selectpoints1.at(i), selectpoints2.at(i), cv::Scalar(5,100, 200)); 
       }
+      cv::recoverPose(essential, selectpoints1, selectpoints2, cameramatrix, R, t);
+      std::cout << R.size() << std::endl;
+      std::cout << t.size() << std::endl;
+      std::cout << t.at<double>(0) <<std::endl;
+      std::cout << t.at<double>(1) <<std::endl;
+      std::cout << t.at<double>(2) <<std::endl;
+        cv::line(frame, cv::Point(30, 30), cv::Point(50 + 100*t.at<double>(0), 50 + 100*t.at<double>(1)), cv::Scalar(200,100, 200)); 
       //cv::drawMatches(oldgrayframe, oldkp, grayframe, kp, goodmatches, output);
       imshow("vid", frame);
     }
