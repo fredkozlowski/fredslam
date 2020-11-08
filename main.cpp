@@ -65,11 +65,15 @@ int main(){
       fundamental = cv::findFundamentalMat(cv::Mat(selectpoints1), cv::Mat(selectpoints2), cv::FM_RANSAC);
       std::vector<cv::Point3f> lines;
       computeCorrespondEpilines(selectpoints1, 1, fundamental, lines);
-      for(auto i : lines){
-        //cv::line(frame, 
+      std::cout << lines.size() << std::endl;
+      std::cout << selectpoints1.size() << std::endl;
+      for(uint i = 0; i < lines.size(); ++i){
+        std::cout << selectpoints1.at(i) << std::endl;
+        std::cout << lines.at(i) << std::endl;
+        cv::line(frame, selectpoints1.at(i), selectpoints2.at(i), cv::Scalar(5,100, 200)); 
       }
       //cv::drawMatches(oldgrayframe, oldkp, grayframe, kp, goodmatches, output);
-      //imshow("vid", output);
+      imshow("vid", frame);
     }
     oldgrayframe = grayframe;
     olddesc = desc;
