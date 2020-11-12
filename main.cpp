@@ -13,6 +13,8 @@ int main(){
   cameramatrix.at<double>(2, 2) = 1;
   cv::Mat R;
   cv::Mat t;
+  cv::Mat Rt;
+  cv::Mat pose = cv::Mat::eye(4, 4, 6);
   cv::Mat output;
   cv::Mat fundamental;
   cv::Mat essential;
@@ -64,28 +66,14 @@ int main(){
     cv::KeyPoint::convert(kp, selectpoints1, pointindex1);
     cv::KeyPoint::convert(oldkp, selectpoints2, pointindex2);
     if(!olddesc.empty()){
-      //fundamental = cv::findFundamentalMat(cv::Mat(selectpoints1), cv::Mat(selectpoints2), cv::FM_RANSAC);
       essential = cv::findEssentialMat(cv::Mat(selectpoints1), cv::Mat(selectpoints2), cameramatrix);
       std::vector<cv::Point3f> lines;
-      //computeCorrespondEpilines(selectpoints1, 1, fundamental, lines);
-      for(uint i = 0; i < selectpoints1.size(); ++i){
-        //std::cout << selectpoints1.at(i) << std::endl;
-        //std::cout << lines.at(i) << std::endl;
-        //cv::line(frame, selectpoints1.at(i), selectpoints2.at(i), cv::Scalar(5,100, 200)); 
-      }
       cv::recoverPose(essential, selectpoints1, selectpoints2, cameramatrix, R, t);
-      std::cout << t.size() << std::endl;
-      std::cout << t.at<double>(0) <<std::endl;
-      std::cout << t.at<double>(1) <<std::endl;
-      std::cout << t.at<double>(2) <<std::endl;
-      std::cout << frame.size() << std::endl;
-      for(int i = 0; i < 3; ++i){
-        for(int j = 0; j < 3; ++j){
-          //std::cout << essential.at<double>(i, j) << " ";
-        }
-        //std::cout << std::endl;
-      }
-        cv::line(frame, cv::Point(30, 30), cv::Point(50 + 100*t.at<double>(0), 50 + 100*t.at<double>(1)), cv::Scalar(200,100, 200)); 
+      cv::hconcat(R, t, Rt);
+      double temp[4] = {0, 0, 0, 1};
+      Rt.push_back(cv::Mat(1, 4, 6, temp));
+      std::cout << pose << std::endl;
+      pose = Rt * pose;
       //cv::drawMatches(oldgrayframe, oldkp, grayframe, kp, goodmatches, output);
       imshow("vid", frame);
     }
